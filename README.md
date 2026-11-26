@@ -1,11 +1,112 @@
-<div align="center">
+# Cadence Planner — Вебзастосунок для планування навчання та контролю особистого прогресу
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Повноцінний full-stack вебзастосунок (UA / EN) для планування навчання, кар'єри, мов, спорту та особистих проєктів у єдиному просторі.
 
-  <h1>Built with AI Studio</h2>
+- **Походження назви**: **Cadence** походить від латинського *«cadentia»* та музичного терміна «каданс» — гармонійного ритму й вивіреного темпу без вигорання.
+- **Розробниця / Developer**: **Дишлюк Анастасія Русланівна (Anastasiia Dyshliuk Ruslanivna)**.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Основні можливості
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+- **Двомовний інтерфейс (UA / EN)**: миттєве перемикання між українською та англійською версіями (інтерфейс, валідації форм, календар `date-fns`, графіки, налаштування та сповіщення).
+- **Реєстрація та JWT-авторизація**: хешування паролів через `bcrypt`, захист усіх персональних даних (кожен користувач бачить і редагує лише власні записи). При першій реєстрації автоматично створюються 5 стартових сфер: «Коледж», «FullStack-курси», «Німецька мова», «Робота», «Спорт».
+- **Дашборд**: персональне привітання за часом доби, блок «Найближчі дедлайни (3 дні)», блок «Прострочені завдання», розклад занять на сьогодні та індикатор загального прогресу.
+- **Сфери та Курси**: повний CRUD із вибором кольорів та іконок, фільтрація курсів за сферами, автоматичний розрахунок `%` виконання курсу та середнього прогресу сфери (`server/services/progressService.js`).
+- **Завдання**: пошук за назвою, фільтри (сфера, курс, статус, пріоритет), сортування, швидка зміна статусу, автоматична фіксація `completed_at` при статусі `done`, червоне виділення прострочених завдань.
+- **Календар**: інтерактивний календар (`react-big-calendar` + `date-fns` з локалями `uk` та `en-US`) у режимах місяць / тиждень / день, який об'єднує заняття за розкладом (зокрема щотижневі) та дедлайни завдань із кольорами відповідних сфер.
+- **Статистика (Recharts)**: стовпчикова діаграма прогресу по курсах, лінійна діаграма виконаних завдань за останні 4 тижні, кругова діаграма розподілу за сферами та підсумкові лічильники.
+- **Сповіщення та приємний звук**: інтеграція з браузерним Notification API для нагадувань за 24 години до дедлайну, стилізовані toast-сповіщення та вбудований синтезатор спокійних гармонійних мелодій (Web Audio API) з вибором мелодії та регулятором гучності.
+- **Адаптивність та теми**: верстка адаптована під desktop, tablet і phone із перемиканням світлої та темної тем.
 
-</div>
+## Технологічний стек
+
+- **Frontend (`/client`)**: React 19, Vite, JavaScript, React Router, Axios, Formik + Yup, Recharts, `react-big-calendar`, `date-fns`, CSS Modules + Tailwind CSS, Vitest.
+- **Backend (`/server`)**: Node.js, Express, SQLite (`better-sqlite3`), `bcrypt`, `jsonwebtoken`, `cors`, `dotenv`, Jest + `supertest`.
+
+## Структура проєкту
+
+```text
+├── client/                     # Клієнтська частина (React + Vite + CSS Modules)
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── vitest.config.js
+│   └── src/
+│       ├── api/                # Axios-клієнт з підтримкою JWT
+│       ├── components/         # Layout, Sidebar, Модальні вікна, ToastContainer
+│       ├── context/            # AuthContext, ThemeContext, NotificationContext
+│       ├── pages/              # 8 сторінок застосунку
+│       ├── tests/              # Unit-тести Vitest
+│       └── utils/              # Звуковий синтезатор, форматування дат, прогрес
+├── server/                     # Серверна частина (Express + SQLite)
+│   ├── package.json
+│   ├── jest.config.js
+│   ├── index.js                # Точка входу сервера
+│   ├── app.js                  # Налаштування Express-застосунку
+│   ├── db/
+│   │   ├── database.js         # Схема SQLite та FOREIGN KEY ON DELETE CASCADE
+│   │   └── seed.js             # Демонстраційні дані (1 користувач, 5 сфер, 7 курсів, 26 завдань)
+│   ├── middleware/             # JWT-авторизація
+│   ├── routes/                 # Маршрути API
+│   ├── controllers/            # Обробники HTTP-запитів
+│   ├── services/               # Бізнес-логіка та progressService.js
+│   └── tests/                  # Unit-тести progressService та API-тести (supertest)
+└── README.md
+```
+
+## Інструкція запуску
+
+### Варіант 1: Окремий запуск `server` та `client`
+
+1. Встановлення залежностей та запуск сервера:
+   ```bash
+   cd server
+   npm install
+   npm run seed   # заповнення демонстраційними даними
+   npm run dev    # запускає API на http://localhost:5000
+   ```
+2. Встановлення залежностей та запуск клієнта (у новому вікні термінала):
+   ```bash
+   cd client
+   npm install
+   npm run dev    # запускає Vite на http://localhost:5173 з проксі на /api
+   ```
+
+### Варіант 2: Єдиний запуск з кореня проєкту
+
+```bash
+npm install
+npm run seed
+npm run dev      # запускає Express + Vite на http://localhost:3000
+```
+
+### Демонстраційний доступ
+
+- **Email**: `olena.kovalenko@study.ua`
+- **Пароль**: `DemoStudy2026!`
+
+## Запуск тестів
+
+```bash
+npm run test:server   # Jest + supertest (unit-тести progressService та API)
+npm run test:client   # Vitest (фронтенд-логіка)
+```
+
+## Список REST API маршрутів
+
+Усі маршрути, крім `/api/auth/register` та `/api/auth/login`, захищені JWT-middleware.
+
+| Метод | Маршрут | Опис |
+| :--- | :--- | :--- |
+| `POST` | `/api/auth/register` | Реєстрація користувача та створення 5 стартових сфер |
+| `POST` | `/api/auth/login` | Вхід у систему та отримання JWT-токена |
+| `POST` | `/api/auth/logout` | Вихід із системи |
+| `GET` | `/api/auth/me` | Дані поточного авторизованого користувача |
+| `GET/POST` | `/api/areas` | Список сфер із прогресом / створення сфери |
+| `GET/PUT/DELETE` | `/api/areas/:id` | Отримання / оновлення / видалення сфери |
+| `GET/POST` | `/api/courses` | Список курсів (фільтр `?areaId=`) / створення курсу |
+| `GET/PUT/DELETE` | `/api/courses/:id` | Отримання / оновлення / видалення курсу |
+| `GET` | `/api/tasks` | Список завдань (`search`, `areaId`, `courseId`, `status`, `priority`, `sort`) |
+| `GET` | `/api/tasks/upcoming?days=3` | Найближчі дедлайни на N днів |
+| `GET/POST/PUT/DELETE` | `/api/tasks`, `/api/tasks/:id` | Створення, перегляд, оновлення та видалення завдання |
+| `GET/POST/PUT/DELETE` | `/api/events`, `/api/events/:id` | Заняття за розкладом (календар) |
+| `GET` | `/api/stats` | Повна статистика прогресу, лічильники та дані для графіків |

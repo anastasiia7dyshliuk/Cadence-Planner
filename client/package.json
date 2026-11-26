@@ -1,0 +1,34 @@
+{
+  "name": "study-planner-client",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Frontend застосунок для планування навчання та контролю особистого прогресу",
+  "scripts": {
+    "dev": "vite --port 5173",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "axios": "^1.21.1",
+    "date-fns": "^4.4.0",
+    "formik": "^2.4.9",
+    "lucide-react": "^0.546.0",
+    "react": "^19.0.1",
+    "react-big-calendar": "^1.20.0",
+    "react-dom": "^19.0.1",
+    "react-router-dom": "^7.18.7",
+    "recharts": "^3.11.1",
+    "yup": "^1.7.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/react": "^16.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "jsdom": "^31.0.1",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.0",
+    "vitest": "^5.1.2"
+  }
+}

@@ -1,0 +1,266 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg-canvas: #F4F6FB;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #EDF1F8;
+  --bg-hover: #E5ECF7;
+  --border-subtle: #E1E7F0;
+  --border-strong: #CBD5E1;
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+
+  --accent-primary: #2563EB;
+  --accent-primary-hover: #1D4ED8;
+  --accent-soft: rgba(37, 99, 235, 0.11);
+  --accent-turquoise: #0D9488;
+  --accent-turquoise-soft: rgba(13, 148, 136, 0.12);
+  --accent-violet: #7C3AED;
+  --accent-violet-soft: rgba(124, 58, 237, 0.12);
+  --accent-fuchsia: #C026D3;
+  --accent-fuchsia-soft: rgba(192, 38, 211, 0.11);
+  --accent-sky: #0EA5E9;
+  --accent-sky-soft: rgba(14, 165, 233, 0.12);
+  --accent-brown: #8B5A2B;
+  --accent-brown-soft: rgba(139, 90, 43, 0.12);
+
+  --danger: #DC2626;
+  --danger-soft: rgba(220, 38, 38, 0.09);
+  --danger-border: rgba(220, 38, 38, 0.32);
+  --warning: #D97706;
+  --success: #0D9488;
+
+  --shadow-card: 0 2px 6px rgba(15, 23, 42, 0.04);
+  --shadow-elevated: 0 14px 32px -8px rgba(15, 23, 42, 0.14);
+
+  --font-display: 'Nunito', system-ui, -apple-system, sans-serif;
+  --font-body: 'Nunito', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+.dark {
+  --bg-canvas: #090D16;
+  --bg-surface: #111827;
+  --bg-surface-subtle: #182234;
+  --bg-hover: #1F2A3E;
+  --border-subtle: #1F2937;
+  --border-strong: #334155;
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+
+  --accent-primary: #3B82F6;
+  --accent-primary-hover: #60A5FA;
+  --accent-soft: rgba(59, 130, 246, 0.17);
+  --accent-turquoise: #14B8A6;
+  --accent-turquoise-soft: rgba(20, 184, 166, 0.16);
+  --accent-violet: #8B5CF6;
+  --accent-violet-soft: rgba(139, 92, 246, 0.17);
+  --accent-fuchsia: #E879F9;
+  --accent-fuchsia-soft: rgba(232, 121, 249, 0.15);
+  --accent-sky: #38BDF8;
+  --accent-sky-soft: rgba(56, 189, 248, 0.16);
+  --accent-brown: #B47B44;
+  --accent-brown-soft: rgba(180, 123, 68, 0.18);
+
+  --danger: #EF4444;
+  --danger-soft: rgba(239, 68, 68, 0.15);
+  --danger-border: rgba(239, 68, 68, 0.36);
+
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.28);
+  --shadow-elevated: 0 16px 36px -8px rgba(0, 0, 0, 0.56);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.cadence-top-ribbon {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 4px;
+  z-index: 60;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    #2563eb 0%,
+    #7c3aed 22%,
+    #d946ef 44%,
+    #ef4444 64%,
+    #0d9488 83%,
+    #0ea5e9 100%
+  );
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.font-mono-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Стилізація react-big-calendar під світлу й темну теми */
+.rbc-calendar {
+  font-family: var(--font-body);
+  color: var(--text-primary);
+}
+
+.rbc-toolbar {
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 1.1rem;
+}
+
+.rbc-toolbar button {
+  color: var(--text-primary);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.rbc-toolbar button:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.rbc-toolbar button.rbc-active {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #FFFFFF;
+}
+
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.rbc-header {
+  border-bottom: 1px solid var(--border-subtle);
+  border-left-color: var(--border-subtle) !important;
+  padding: 0.6rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background-color: var(--bg-surface-subtle);
+}
+
+.rbc-day-bg + .rbc-day-bg,
+.rbc-month-row + .rbc-month-row,
+.rbc-time-content > * + * > *,
+.rbc-timeslot-group,
+.rbc-time-header-content {
+  border-color: var(--border-subtle) !important;
+}
+
+.rbc-off-range-bg {
+  background-color: var(--bg-surface-subtle);
+  opacity: 0.55;
+}
+
+.rbc-today {
+  background-color: var(--accent-soft) !important;
+}
+
+.rbc-date-cell {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+}
+
+.rbc-event {
+  border-radius: 6px !important;
+  padding: 2px 6px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  border: none !important;
+}
+
+.rbc-show-more {
+  color: var(--accent-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.cadence-calendar-wrap {
+  height: 640px;
+}
+
+@media (max-width: 1023px) {
+  .cadence-calendar-wrap {
+    height: 560px;
+  }
+}
+
+@media (max-width: 639px) {
+  .cadence-calendar-wrap {
+    height: 470px;
+  }
+
+  .rbc-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .rbc-toolbar-label {
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .rbc-btn-group {
+    display: flex;
+    justify-content: center;
+  }
+
+  .rbc-toolbar button {
+    flex: 1;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.78rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

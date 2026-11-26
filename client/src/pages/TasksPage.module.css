@@ -1,0 +1,74 @@
+.filterBar {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(4, minmax(120px, 1fr));
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+}
+
+.tableWrap {
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  padding: 0.85rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface-subtle);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.rowOverdue {
+  background-color: var(--danger-soft);
+}
+
+.mobileCards {
+  display: none;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+@media (max-width: 1023px) {
+  .filterBar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tableWrap {
+    display: none;
+  }
+
+  .mobileCards {
+    display: flex;
+  }
+}
+
+@media (max-width: 639px) {
+  .filterBar {
+    grid-template-columns: 1fr;
+    padding: 0.85rem;
+  }
+}
