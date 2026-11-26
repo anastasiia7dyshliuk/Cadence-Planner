@@ -199,6 +199,14 @@ export default function LoginPage() {
                       {errors.password}
                     </p>
                   )}
+                  <div className="mt-1.5 text-right">
+                    <Link
+                      to="/forgot-password"
+                      className="text-xs font-semibold text-[var(--accent-primary)] hover:underline"
+                    >
+                      {t.auth.forgotPassword}
+                    </Link>
+                  </div>
                 </div>
 
                 <label className="flex items-start gap-2.5 cursor-pointer select-none">

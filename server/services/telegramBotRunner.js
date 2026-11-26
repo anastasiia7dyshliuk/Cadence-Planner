@@ -29,14 +29,21 @@ export function startBotAndReminderServices(db) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         commands: [
-          { command: 'start', description: 'Запуск бота та закріплення посилання' },
-          { command: 'deadlines', description: 'Найближчі та прострочені дедлайни' },
-          { command: 'today', description: 'Розклад занять на сьогодні' },
-          { command: 'support', description: 'Підтримка та порада для фокусу' },
-          { command: 'pin', description: 'Закріплене посилання на Cadence Planner' },
+          { command: 'start', description: '👋 Запуск бота та закріплення посилання' },
+          { command: 'deadlines', description: '⏰ Найближчі та прострочені дедлайни' },
+          { command: 'today', description: '📅 Розклад занять на сьогодні' },
+          { command: 'support', description: '💙 Підтримка та порада для фокусу' },
+          { command: 'pin', description: '📌 Закріплене посилання на Cadence Planner' },
         ],
       }),
-    }).catch(() => {});
+    }).catch(() => { });
+
+    // Ім'я бота, яке бачать користувачі в Telegram (без підкреслень)
+    fetch(`${baseUrl}/setMyName`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Cadence Pulse' }),
+    }).catch(() => { });
 
     fetch(`${baseUrl}/setMyDescription`, {
       method: 'POST',
@@ -45,7 +52,7 @@ export function startBotAndReminderServices(db) {
         description:
           'Cadence Pulse — бот-помічник планувальника Cadence Planner. Нагадує про дедлайни, показує розклад на сьогодні, підтримує під час навчання та тримає швидке посилання на застосунок у закрепі.',
       }),
-    }).catch(() => {});
+    }).catch(() => { });
 
     fetch(`${baseUrl}/setMyShortDescription`, {
       method: 'POST',
@@ -53,7 +60,7 @@ export function startBotAndReminderServices(db) {
       body: JSON.stringify({
         short_description: 'Бот-нагадувальник дедлайнів, розкладу та підтримки для Cadence Planner.',
       }),
-    }).catch(() => {});
+    }).catch(() => { });
 
     if (!useWebhookMode) {
       let stopped = false;
@@ -128,7 +135,7 @@ export function startBotAndReminderServices(db) {
               await sendTelegramBotMessage(
                 chatId,
                 `Привіт! Я Cadence Pulse — помічник застосунку Cadence Planner.\n\n` +
-                  `Щоб прив’язати свій акаунт, відкрий розділ «Профіль» у вебзастосунку, вкажи свій Telegram @username або скопіюй команду /start <код>:\n${webAppUrl}`
+                `Щоб прив’язати свій акаунт, відкрий розділ «Профіль» у вебзастосунку, вкажи свій Telegram @username або скопіюй команду /start <код>:\n${webAppUrl}`
               );
               continue;
             }
@@ -153,7 +160,7 @@ export function startBotAndReminderServices(db) {
       };
 
       fetch(`${baseUrl}/deleteWebhook`, { method: 'POST' })
-        .catch(() => {})
+        .catch(() => { })
         .finally(() => {
           scheduleNextPoll(150);
         });
@@ -191,7 +198,7 @@ export function startBotAndReminderServices(db) {
         sentTodayCache.add(tgKey);
         const user = getUserById(db, pref.user_id);
         const { reply } = buildBotCommandReply(db, user, '/deadlines', 'uk');
-        sendTelegramBotMessage(pref.telegram_chat_id, reply).catch(() => {});
+        sendTelegramBotMessage(pref.telegram_chat_id, reply).catch(() => { });
       }
     }
   };

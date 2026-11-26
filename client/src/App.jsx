@@ -9,6 +9,7 @@ import AreasPage from './pages/AreasPage.jsx';
 import CalendarPage from './pages/CalendarPage.jsx';
 import CoursesPage from './pages/CoursesPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
+import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx';
 import GuidePage from './pages/GuidePage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
@@ -47,6 +48,14 @@ function AppRoutes() {
         element={
           <PublicOnlyRoute>
             <LoginPage />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicOnlyRoute>
+            <ForgotPasswordPage />
           </PublicOnlyRoute>
         }
       />

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { getUserById } from '../services/authService.js';
-import { getWebAppUrl, isSmtpConfigured, sendDeadlineReminderEmail } from '../services/emailService.js';
+import { getWebAppUrl, isEmailConfigured, sendDeadlineReminderEmail } from '../services/emailService.js';
 import {
   BOT_NAME,
   buildBotCommandReply,
@@ -44,7 +44,7 @@ export function getIntegrations(req, res, next) {
     return res.status(200).json({
       preferences: prefs,
       capabilities: {
-        smtpConfigured: isSmtpConfigured(),
+        smtpConfigured: isEmailConfigured(),
         telegramConfigured: isTelegramConfigured(),
         botName: BOT_NAME,
         botUsername: getBotUsername(),

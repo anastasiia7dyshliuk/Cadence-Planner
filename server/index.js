@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import { createApp } from './app.js';
 import { initDb } from './db/database.js';
 import { seedDatabase } from './db/seed.js';
+import { startBotAndReminderServices } from './services/telegramBotRunner.js';
 
 dotenv.config();
 
@@ -10,6 +11,9 @@ const PORT = Number(process.env.PORT || 5000);
 async function bootstrap() {
   const db = initDb();
   await seedDatabase(db);
+
+  // Telegram-бот і періодичні нагадування (запускаються, лише якщо задано TELEGRAM_BOT_TOKEN)
+  startBotAndReminderServices(db);
 
   const app = createApp(db);
   app.listen(PORT, '0.0.0.0', () => {

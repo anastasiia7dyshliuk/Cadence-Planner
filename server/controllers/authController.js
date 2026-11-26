@@ -5,6 +5,7 @@ import {
   signUserToken,
   updateUserProfile,
 } from '../services/authService.js';
+import { requestPasswordReset, resetPassword } from '../services/passwordResetService.js';
 
 function setAuthCookie(res, token, rememberMe = true) {
   const maxAgePart = rememberMe ? ` Max-Age=${30 * 24 * 60 * 60};` : '';
@@ -83,6 +84,37 @@ export function updateProfile(req, res, next) {
     const result = updateUserProfile(db, req.user.id, { name, email, bio, avatar_url });
     setAuthCookie(res, result.token);
     return res.status(200).json(result);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+/**
+ * Крок 1 відновлення пароля: надсилає код на пошту та/або в Telegram.
+ */
+export async function forgotPassword(req, res, next) {
+  try {
+    const db = req.app.locals.db;
+    const { email, lang } = req.body || {};
+    const result = await requestPasswordReset(db, { email, lang });
+    return res.status(200).json({
+      message: 'Якщо акаунт із такою поштою існує, ми надіслали код для відновлення.',
+      channels: result.channels,
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+/**
+ * Крок 2 відновлення пароля: перевіряє код і встановлює новий пароль.
+ */
+export async function confirmPasswordReset(req, res, next) {
+  try {
+    const db = req.app.locals.db;
+    const { email, code, newPassword } = req.body || {};
+    await resetPassword(db, { email, code, newPassword });
+    return res.status(200).json({ message: 'Пароль успішно змінено.' });
   } catch (err) {
     return next(err);
   }

@@ -74,34 +74,51 @@ export function getOrCreateNotificationPrefs(db, userId, defaultEmail = '') {
 
 /**
  * Формує текст закріпленого повідомлення з посиланням на вебзастосунок Cadence Planner.
+ * Це ЄДИНЕ місце, де бот надсилає посилання: воно закріплюється вгорі чату,
+ * тому в інших відповідях повторювати його не потрібно.
  */
 export function buildPinnedMessage(lang = 'uk') {
   const url = getWebAppUrl();
   if (lang === 'en') {
     return (
-      `📌 Cadence Pulse — Your Study & Rhythm Companion\n` +
-      `Open Cadence Planner anytime: ${url}\n` +
-      `Commands: /deadlines · /today · /support · /pin`
+      `📌 Cadence Pulse — your study & rhythm buddy\n\n` +
+      `🌐 Cadence Planner: ${url}\n\n` +
+      `🧭 Commands:\n` +
+      `⏰ /deadlines — upcoming & overdue tasks\n` +
+      `📅 /today — today's sessions\n` +
+      `💙 /support — a gentle boost\n` +
+      `📌 /pin — pin this message again`
     );
   }
   return (
-    `📌 Cadence Pulse — твій бот-помічник ритму та дедлайнів\n` +
-    `Посилання на вебзастосунок Cadence Planner: ${url}\n` +
-    `Команди: /deadlines · /today · /support · /pin`
+    `📌 Cadence Pulse — твій помічник ритму та дедлайнів\n\n` +
+    `🌐 Cadence Planner: ${url}\n\n` +
+    `🧭 Команди:\n` +
+    `⏰ /deadlines — найближчі та прострочені завдання\n` +
+    `📅 /today — заняття на сьогодні\n` +
+    `💙 /support — підтримка й порада\n` +
+    `📌 /pin — закріпити це повідомлення знову`
   );
 }
 
 const SUPPORT_TIPS_UK = [
-  'Маленькі кроки щодня сильніші за марафон в останню ніч. Оберіть 1 задачу на найближчі 25 хвилин!',
-  'Твій ритм — це не гонитва. Закрий одне просте завдання, щоб відчути легкий імпульс руху вперед.',
-  'Після 45 хвилин навчання зроби 5 хвилин перерви без екрана — мозок закріпить матеріал значно краще.',
+  '🐢 Маленькі кроки щодня сильніші за марафон в останню ніч. Обери одне завдання на найближчі 25 хвилин!',
+  '🎵 Твій ритм — це не гонитва. Закрий одне просте завдання, щоб відчути легкий імпульс руху вперед.',
+  '☕ Після 45 хвилин навчання зроби 5 хвилин перерви без екрана — мозок закріпить матеріал значно краще.',
 ];
 
 const SUPPORT_TIPS_EN = [
-  'Small steady steps beat last-minute marathons. Pick just one task for the next 25 minutes!',
-  'Your cadence is not a race. Finish one manageable task first to build calm momentum.',
-  'Take a 5-minute screen-free breather after 45 minutes of focus—your memory consolidates faster.',
+  '🐢 Small steady steps beat last-minute marathons. Pick just one task for the next 25 minutes!',
+  '🎵 Your cadence is not a race. Finish one manageable task first to build calm momentum.',
+  '☕ Take a 5-minute screen-free breather after 45 minutes of focus — your memory consolidates faster.',
 ];
+
+// Смайлик пріоритету завдання: червоний — високий, жовтий — середній, зелений — низький
+function priorityEmoji(priority) {
+  if (priority === 'high') return '🔴';
+  if (priority === 'medium') return '🟡';
+  return '🟢';
+}
 
 /**
  * Генерує відповідь бота Cadence Pulse на команду користувача (без ШІ, на основі даних SQLite).
@@ -109,7 +126,7 @@ const SUPPORT_TIPS_EN = [
 export function buildBotCommandReply(db, user, commandText = '/start', lang = 'uk') {
   const cmd = String(commandText || '/start').trim().split(/\s+/)[0].toLowerCase();
   const isEn = lang === 'en';
-  const url = getWebAppUrl();
+  const firstName = user.name.split(' ')[0];
   const nowIso = new Date().toISOString();
   const horizonIso = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
 
@@ -129,10 +146,16 @@ export function buildBotCommandReply(db, user, commandText = '/start', lang = 'u
   if (cmd === '/start' || cmd === '/pin') {
     const pinnedText = buildPinnedMessage(lang);
     const intro = isEn
-      ? `Hey ${user.name.split(' ')[0]}! I'm Cadence Pulse, your personal study reminder & support buddy.\n\n` +
-        `I'll nudge you gently before deadlines and keep the quick link to Cadence Planner pinned right at the top:\n${url}`
-      : `Привіт, ${user.name.split(' ')[0]}! Я Cadence Pulse — твій дружній бот-нагадувальник і підтримка.\n\n` +
-        `Я нагадуватиму про дедлайни та триматиму у закрепі швидке посилання на Cadence Planner:\n${url}`;
+      ? `👋 Hey, ${firstName}! I'm Cadence Pulse 🤖\n\n` +
+      `🔔 I'll gently remind you about deadlines\n` +
+      `📅 show your schedule for today\n` +
+      `💙 and cheer you on while you study.\n\n` +
+      `📌 The link to Cadence Planner is pinned at the top of this chat ⬆️`
+      : `👋 Привіт, ${firstName}! Я Cadence Pulse 🤖\n\n` +
+      `🔔 Нагадуватиму про дедлайни\n` +
+      `📅 показуватиму розклад на сьогодні\n` +
+      `💙 і підтримуватиму під час навчання.\n\n` +
+      `📌 Посилання на Cadence Planner закріплене вгорі чату ⬆️`;
     return { reply: intro, pinnedText, shouldPin: true };
   }
 
@@ -140,21 +163,22 @@ export function buildBotCommandReply(db, user, commandText = '/start', lang = 'u
     if (upcoming.length === 0 && overdue.length === 0) {
       return {
         reply: isEn
-          ? `All clear! You have 0 urgent or overdue tasks right now. Keep enjoying your steady rhythm! ✨\nOpen planner: ${url}`
-          : `Усе чисто! Термінових чи прострочених завдань зараз немає. Чудовий ритм! ✨\nВідкрити планувальник: ${url}`,
+          ? `🎉 All clear! No urgent or overdue tasks right now.\n✨ Keep enjoying your steady rhythm!`
+          : `🎉 Усе чисто! Термінових чи прострочених завдань зараз немає.\n✨ Чудовий ритм, так тримати!`,
         shouldPin: false,
       };
     }
 
-    const lines = [];
+    const lines = [isEn ? `📋 Your deadlines:` : `📋 Твої дедлайни:`, ''];
     if (overdue.length > 0) {
-      lines.push(isEn ? `⚠️ Overdue (${overdue.length}):` : `⚠️ Прострочені (${overdue.length}):`);
-      overdue.slice(0, 3).forEach((t) => lines.push(`• ${t.title} (${t.course_title})`));
+      lines.push(isEn ? `🚨 Overdue (${overdue.length}):` : `🚨 Прострочені (${overdue.length}):`);
+      overdue.slice(0, 3).forEach((t) => {
+        lines.push(`${priorityEmoji(t.priority)} ${t.title} · 📚 ${t.course_title}`);
+      });
+      lines.push('');
     }
     if (upcoming.length > 0) {
-      lines.push(
-        isEn ? `⏰ Due within 3 days (${upcoming.length}):` : `⏰ Найближчі 3 дні (${upcoming.length}):`
-      );
+      lines.push(isEn ? `⏰ Next 3 days (${upcoming.length}):` : `⏰ Найближчі 3 дні (${upcoming.length}):`);
       upcoming.slice(0, 4).forEach((t) => {
         const dt = new Date(t.deadline).toLocaleString(isEn ? 'en-US' : 'uk-UA', {
           month: 'short',
@@ -162,11 +186,12 @@ export function buildBotCommandReply(db, user, commandText = '/start', lang = 'u
           hour: '2-digit',
           minute: '2-digit',
         });
-        lines.push(`• ${t.title} — ${dt}`);
+        lines.push(`${priorityEmoji(t.priority)} ${t.title} — 🗓 ${dt}`);
       });
+      lines.push('');
     }
-    lines.push(`\n🔗 ${url}`);
-    return { reply: lines.join('\n'), shouldPin: false };
+    lines.push(isEn ? `💪 You can do it!` : `💪 У тебе все вийде!`);
+    return { reply: lines.join('\n').trim(), shouldPin: false };
   }
 
   if (cmd === '/today') {
@@ -183,8 +208,8 @@ export function buildBotCommandReply(db, user, commandText = '/start', lang = 'u
     if (events.length === 0) {
       return {
         reply: isEn
-          ? `No scheduled sessions on today's calendar—great space for deep focus or rest.\n🔗 ${url}`
-          : `На сьогодні в календарі немає запланованих занять — чудовий час для глибокого фокусу або відпочинку.\n🔗 ${url}`,
+          ? `🌿 No sessions on today's calendar.\n🧘 A great window for deep focus or a good rest!`
+          : `🌿 На сьогодні занять у календарі немає.\n🧘 Чудовий час для глибокого фокусу або відпочинку!`,
         shouldPin: false,
       };
     }
@@ -194,13 +219,13 @@ export function buildBotCommandReply(db, user, commandText = '/start', lang = 'u
         hour: '2-digit',
         minute: '2-digit',
       });
-      return `• ${time} — ${ev.title}`;
+      return `🕘 ${time} — ${ev.title}`;
     });
     return {
       reply:
-        (isEn ? `📅 Today's schedule:\n` : `📅 Заняття на сьогодні:\n`) +
+        (isEn ? `📅 Today's schedule:\n\n` : `📅 Заняття на сьогодні:\n\n`) +
         evLines.join('\n') +
-        `\n\n🔗 ${url}`,
+        (isEn ? `\n\n🚀 Have a productive day!` : `\n\n🚀 Продуктивного дня!`),
       shouldPin: false,
     };
   }
@@ -211,19 +236,19 @@ export function buildBotCommandReply(db, user, commandText = '/start', lang = 'u
     const nextTask = upcoming[0] || tasks[0];
     const encouragement = nextTask
       ? isEn
-        ? `\n\nSuggested next step: «${nextTask.title}» (${nextTask.course_title}). You've got this!`
-        : `\n\nНаступний спокійний крок: «${nextTask.title}» (${nextTask.course_title}). У тебе все вийде!`
+        ? `\n\n👉 Suggested next step: «${nextTask.title}» (📚 ${nextTask.course_title}).\n🌟 You've got this!`
+        : `\n\n👉 Наступний спокійний крок: «${nextTask.title}» (📚 ${nextTask.course_title}).\n🌟 У тебе все вийде!`
       : '';
     return {
-      reply: `💙 ${tip}${encouragement}\n\n🔗 ${url}`,
+      reply: (isEn ? `💙 A little boost from Cadence Pulse:\n\n` : `💙 Порада від Cadence Pulse:\n\n`) + `${tip}${encouragement}`,
       shouldPin: false,
     };
   }
 
   return {
     reply: isEn
-      ? `Available commands:\n/deadlines — upcoming & overdue tasks\n/today — today's sessions\n/support — gentle study motivation\n/pin — pinned Cadence Planner link`
-      : `Доступні команди:\n/deadlines — найближчі та прострочені задачі\n/today — розклад занять на сьогодні\n/support — підтримка та порада для фокусу\n/pin — закріплене посилання на Cadence Planner`,
+      ? `🤔 I don't know this command yet.\n\n🧭 Available commands:\n⏰ /deadlines — upcoming & overdue tasks\n📅 /today — today's sessions\n💙 /support — a gentle boost\n📌 /pin — pinned Cadence Planner link`
+      : `🤔 Такої команди я поки не знаю.\n\n🧭 Доступні команди:\n⏰ /deadlines — найближчі та прострочені завдання\n📅 /today — заняття на сьогодні\n💙 /support — підтримка й порада\n📌 /pin — закріплене посилання на Cadence Planner`,
     shouldPin: false,
   };
 }
