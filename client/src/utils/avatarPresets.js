@@ -1,4 +1,4 @@
-export const DEFAULT_PHOTO_AVATAR = '/src/assets/images/profile_avatar_student_1795646968931.jpg';
+export const DEFAULT_PHOTO_AVATAR = '/images/avatar-student.jpg';
 
 export const AVATAR_PRESETS = [
   {

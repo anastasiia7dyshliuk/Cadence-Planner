@@ -21,7 +21,7 @@ const ALLOWED_AVATAR_PRESETS = new Set([
   'preset:amber',
   'preset:indigo',
   'preset:initial',
-  '/src/assets/images/profile_avatar_student_1795646968931.jpg',
+  '/images/avatar-student.jpg',
 ]);
 
 const RASTER_DATA_URI_REGEX = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;

@@ -211,5 +211,49 @@ export function buildStatsPayload({ areas = [], courses = [], tasks = [], now = 
     areaProgress: areaDistribution,
     areaDistribution: areaDistribution.filter((a) => a.count > 0),
     weeklyCompleted: buildWeeklyCompletionSeries(tasks, now),
+    streak: calculateStreak(tasks, now),
   };
+}
+
+/**
+ * Перетворює дату на рядок "РРРР-ММ-ДД" за місцевим часом.
+ */
+function toDayKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Рахує серію днів: скільки днів поспіль користувач виконував
+ * хоча б одне завдання. Якщо сьогодні ще нічого не виконано,
+ * серія не обривається, а рахується від учорашнього дня.
+ */
+export function calculateStreak(tasks = [], now = new Date()) {
+  // 1. Збираємо всі дні, коли було виконано хоча б одне завдання
+  const doneDays = new Set();
+  for (const task of tasks) {
+    if (task.status === 'done' && task.completed_at) {
+      const completedDate = new Date(task.completed_at);
+      if (!Number.isNaN(completedDate.getTime())) {
+        doneDays.add(toDayKey(completedDate));
+      }
+    }
+  }
+
+  // 2. Обираємо день, з якого починаємо рахувати
+  const currentDay = new Date(now);
+  if (!doneDays.has(toDayKey(currentDay))) {
+    currentDay.setDate(currentDay.getDate() - 1);
+  }
+
+  // 3. Йдемо назад по днях, поки не трапиться день без виконаних завдань
+  let streak = 0;
+  while (doneDays.has(toDayKey(currentDay))) {
+    streak += 1;
+    currentDay.setDate(currentDay.getDate() - 1);
+  }
+
+  return streak;
 }

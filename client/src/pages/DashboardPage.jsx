@@ -146,6 +146,7 @@ export default function DashboardPage() {
 
   const counters = stats?.counters || { total: 0, done: 0, in_progress: 0, overdue: 0 };
   const overallProgress = stats?.overallProgress ?? 0;
+  const streak = stats?.streak ?? 0;
 
   return (
     <div className="space-y-6">
@@ -209,7 +210,7 @@ export default function DashboardPage() {
         <div className={styles.heroMedia}>
           {!bannerBroken ? (
             <img
-              src="/src/assets/images/dashboard_focus_art_1795646968420.jpg"
+              src="/images/dashboard-focus.jpg"
               alt="Cadence Planner abstract balance artwork"
               referrerPolicy="no-referrer"
               onError={() => setBannerBroken(true)}
@@ -318,6 +319,25 @@ export default function DashboardPage() {
             </span>
             <span className="text-xs text-[var(--text-secondary)]">
               {t.dashboard.kpiOnSchedule}
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.kpiCard}>
+          <div
+            className={styles.kpiAccentBar}
+            style={{ backgroundColor: 'var(--accent-violet)' }}
+            aria-hidden="true"
+          />
+          <p className="text-xs font-medium text-[var(--text-muted)] mb-1">
+            {t.dashboard.kpiStreak}
+          </p>
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-2xl font-extrabold font-mono-num text-[var(--accent-violet)]">
+              🔥 {streak}
+            </span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              {t.dashboard.kpiStreakHint}
             </span>
           </div>
         </div>

@@ -270,7 +270,7 @@ export default function LoginPage() {
         <div className={styles.visualInner}>
           {!heroBroken && (
             <img
-              src="/src/assets/images/auth_hero_study_1795646968469.jpg"
+              src="/images/auth-hero.jpg"
               alt="Cadence Planner workspace"
               referrerPolicy="no-referrer"
               onError={() => setHeroBroken(true)}

@@ -15,7 +15,7 @@ export default function EmptyState({
       {showImage && !imgError ? (
         <div className="w-48 h-36 rounded-xl overflow-hidden mb-5 border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)]">
           <img
-            src="/src/assets/images/empty_planner_art_1795646968972.jpg"
+            src="/images/empty-planner.jpg"
             alt="Чистий щоденник для нових навчальних цілей"
             referrerPolicy="no-referrer"
             onError={() => setImgError(true)}
