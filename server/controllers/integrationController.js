@@ -5,7 +5,6 @@ import {
   BOT_NAME,
   buildBotCommandReply,
   buildPinnedMessage,
-  discoverChatIdFromUpdates,
   generateLinkCode,
   getBotDeepLink,
   getBotUsername,
@@ -209,26 +208,14 @@ export async function testTelegramNotification(req, res, next) {
       prefs = getOrCreateNotificationPrefs(db, req.user.id, user.email);
     }
 
-    const { reply } = buildBotCommandReply(db, user, '/deadlines', lang);
-    const pinContent = buildPinnedMessage(lang);
+    // Кнопка «Написати мені в Telegram» надсилає те саме стартове привітання, що й команда /start
+    const { reply, pinnedText } = buildBotCommandReply(db, user, '/start', lang);
+    const pinContent = pinnedText || buildPinnedMessage(lang);
     const deepLink = getBotDeepLink(prefs.telegram_link_code);
     const targetHandle = prefs.telegram_username || (prefs.telegram_chat_id ? `ID ${prefs.telegram_chat_id}` : '');
 
-    // Якщо токен бота налаштований, але chat_id ще немає — намагаємось знайти користувача в getUpdates
-    if (isTelegramConfigured() && !prefs.telegram_chat_id) {
-      const discovered = await discoverChatIdFromUpdates({
-        linkCode: prefs.telegram_link_code,
-        username: prefs.telegram_username,
-      });
-      if (discovered?.chatId) {
-        db.prepare(
-          `UPDATE notification_preferences
-           SET telegram_chat_id = ?, telegram_username = ?, telegram_enabled = 1, updated_at = datetime('now')
-           WHERE user_id = ?`
-        ).run(discovered.chatId, discovered.username || prefs.telegram_username, req.user.id);
-        prefs = getOrCreateNotificationPrefs(db, req.user.id, user.email);
-      }
-    }
+    // Telegram не дозволяє ботам писати першими: chat_id зʼявляється лише після того,
+    // як користувач сам натисне «Почати» в боті (прив’язку виконує telegramBotRunner).
 
     if (isTelegramConfigured() && prefs.telegram_chat_id) {
       await sendTelegramBotMessage(prefs.telegram_chat_id, reply);
@@ -312,6 +299,8 @@ export async function telegramWebhook(req, res, next) {
 
     const chatId = String(msg.chat.id);
     const username = msg.from?.username ? `@${msg.from.username}` : '';
+    // Мова відповіді — за мовою Telegram користувача: англійська для 'en', інакше українська
+    const botLang = String(msg.from?.language_code || '').startsWith('en') ? 'en' : 'uk';
     const text = String(msg.text).trim();
 
     // Прив'язка по /start CAD-XXXXXX
@@ -329,7 +318,7 @@ export async function telegramWebhook(req, res, next) {
         ).run(chatId, username, matched.user_id);
 
         const user = getUserById(db, matched.user_id);
-        const { reply, pinnedText } = buildBotCommandReply(db, user, '/start', 'uk');
+        const { reply, pinnedText } = buildBotCommandReply(db, user, '/start', botLang);
         await sendTelegramBotMessage(chatId, reply);
         if (pinnedText) {
           await sendTelegramBotMessage(chatId, pinnedText, { pin: true });
@@ -345,13 +334,15 @@ export async function telegramWebhook(req, res, next) {
     if (!prefRow) {
       await sendTelegramBotMessage(
         chatId,
-        'Привіт! Скопіюй команду /start <код> із розділу «Профіль» у Cadence Planner, щоб прив’язати свій акаунт.'
+        botLang === 'en'
+          ? '👋 Hi! Open Profile in Cadence Planner and click "Message me on Telegram" to link your account.'
+          : '👋 Привіт! Відкрий «Профіль» у Cadence Planner і натисни «Написати мені в Telegram», щоб прив’язати акаунт.'
       );
       return res.status(200).json({ ok: true });
     }
 
     const user = getUserById(db, prefRow.user_id);
-    const { reply, pinnedText, shouldPin } = buildBotCommandReply(db, user, text, 'uk');
+    const { reply, pinnedText, shouldPin } = buildBotCommandReply(db, user, text, botLang);
     await sendTelegramBotMessage(chatId, reply);
     if (shouldPin && pinnedText) {
       await sendTelegramBotMessage(chatId, pinnedText, { pin: true });

@@ -38,6 +38,22 @@ export function startBotAndReminderServices(db) {
       }),
     }).catch(() => { });
 
+    // Англійське меню команд — для користувачів з англійською мовою Telegram
+    fetch(`${baseUrl}/setMyCommands`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        language_code: 'en',
+        commands: [
+          { command: 'start', description: '👋 Start the bot and pin the app link' },
+          { command: 'deadlines', description: '⏰ Upcoming and overdue deadlines' },
+          { command: 'today', description: "📅 Today's sessions" },
+          { command: 'support', description: '💙 A gentle study boost' },
+          { command: 'pin', description: '📌 Pinned Cadence Planner link' },
+        ],
+      }),
+    }).catch(() => { });
+
     // Ім'я бота, яке бачать користувачі в Telegram (без підкреслень)
     fetch(`${baseUrl}/setMyName`, {
       method: 'POST',
@@ -89,6 +105,8 @@ export function startBotAndReminderServices(db) {
 
             const chatId = String(msg.chat.id);
             const username = msg.from?.username ? `@${msg.from.username}` : '';
+            // Мова відповіді — за мовою Telegram користувача: англійська для 'en', інакше українська
+            const botLang = String(msg.from?.language_code || '').startsWith('en') ? 'en' : 'uk';
             const text = String(msg.text).trim();
 
             if (text.startsWith('/start ')) {
@@ -105,7 +123,7 @@ export function startBotAndReminderServices(db) {
                 ).run(chatId, username, matched.user_id);
 
                 const user = getUserById(db, matched.user_id);
-                const { reply, pinnedText } = buildBotCommandReply(db, user, '/start', 'uk');
+                const { reply, pinnedText } = buildBotCommandReply(db, user, '/start', botLang);
                 await sendTelegramBotMessage(chatId, reply);
                 if (pinnedText) {
                   await sendTelegramBotMessage(chatId, pinnedText, { pin: true });
@@ -134,14 +152,17 @@ export function startBotAndReminderServices(db) {
             if (!prefRow) {
               await sendTelegramBotMessage(
                 chatId,
-                `Привіт! Я Cadence Pulse — помічник застосунку Cadence Planner.\n\n` +
-                `Щоб прив’язати свій акаунт, відкрий розділ «Профіль» у вебзастосунку, вкажи свій Telegram @username або скопіюй команду /start <код>:\n${webAppUrl}`
+                botLang === 'en'
+                  ? `👋 Hi! I'm Cadence Pulse 🤖 — the assistant of Cadence Planner.\n\n` +
+                  `🔗 To link your account, open Profile in the web app and click "Message me on Telegram":\n${webAppUrl}`
+                  : `👋 Привіт! Я Cadence Pulse 🤖 — помічник застосунку Cadence Planner.\n\n` +
+                  `🔗 Щоб прив’язати акаунт, відкрий «Профіль» у вебзастосунку й натисни «Написати мені в Telegram»:\n${webAppUrl}`
               );
               continue;
             }
 
             const user = getUserById(db, prefRow.user_id);
-            const { reply, pinnedText, shouldPin } = buildBotCommandReply(db, user, text, 'uk');
+            const { reply, pinnedText, shouldPin } = buildBotCommandReply(db, user, text, botLang);
             await sendTelegramBotMessage(chatId, reply);
             if (shouldPin && pinnedText) {
               await sendTelegramBotMessage(chatId, pinnedText, { pin: true });
