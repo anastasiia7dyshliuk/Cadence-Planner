@@ -93,6 +93,29 @@ export default function ProfilePage() {
     loadIntegrations();
   }, [loadIntegrations]);
 
+  // Коли користувач повертається з Telegram на вкладку сайту, тихо оновлюємо статус прив’язки,
+  // щоб Chat ID і перемикач нагадувань з’явилися без перезавантаження сторінки.
+  // Оновлюємо лише ці два поля, щоб не стерти те, що користувач уже ввів у формі.
+  useEffect(() => {
+    const handleFocus = async () => {
+      try {
+        const res = await apiClient.get(`/integrations?lang=${lang}`);
+        const fresh = res.data?.preferences;
+        if (fresh) {
+          setPrefs((prev) => ({
+            ...prev,
+            telegram_chat_id: fresh.telegram_chat_id,
+            telegram_enabled: fresh.telegram_enabled,
+          }));
+        }
+      } catch {
+        // Якщо сервер недоступний — просто нічого не оновлюємо
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [lang]);
+
   const handleSaveIntegrations = async () => {
     setSavingIntegrations(true);
     try {
@@ -145,6 +168,20 @@ export default function ProfilePage() {
   };
 
   const handleSendTestTelegram = async () => {
+    // Telegram не дозволяє ботам писати першими. Якщо чат ще не прив’язаний,
+    // відкриваємо бота за посиланням із кодом: користувачу лишається натиснути «Почати»,
+    // і бот сам прив’яже акаунт та надішле стартове привітання.
+    if (!prefs.telegram_chat_id) {
+      window.open(capabilities.botDeepLink, '_blank', 'noopener,noreferrer');
+      pushToast({
+        title: capabilities.botName,
+        message: t.profile.integrations.telegramOpenStart,
+        type: 'reminder',
+        playSound: false,
+      });
+      return;
+    }
+
     setSendingTgTest(true);
     try {
       const res = await apiClient.post('/integrations/test-telegram', {
