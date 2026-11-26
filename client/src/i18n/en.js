@@ -562,6 +562,10 @@ const en = {
                 q: 'How can I easily find the website again?',
                 a: 'After you link your account, @cadence_pulse_bot pins a message with a direct link to Cadence Planner at the top of the chat. If you unpinned it, send /pin and the link will appear again.',
             },
+            {
+                q: 'Which language does the bot use?',
+                a: 'Cadence Pulse replies in the language of your Telegram app: English if Telegram is set to English, Ukrainian otherwise. The command menu follows the same language. The greeting sent by the "Message me on Telegram" button uses the site language, while automatic deadline reminders are sent in Ukrainian.',
+            },
         ],
     },
     notifications: {

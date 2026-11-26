@@ -1,5 +1,8 @@
 import cors from 'cors';
 import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import areaRoutes from './routes/areaRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
@@ -8,6 +11,10 @@ import integrationRoutes from './routes/integrationRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 import { AppError } from './utils/errors.js';
+
+// Папка зі зібраним фронтендом (client/dist). Вона з’являється після `npm run build`.
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const CLIENT_DIST = path.resolve(__dirname, '..', 'client', 'dist');
 
 /**
  * Створює та конфігурує Express-застосунок без прив'язки до конкретного порту.
@@ -44,6 +51,17 @@ export function createApp(db, { mountNotFound = true } = {}) {
   if (mountNotFound) {
     app.use('/api', (_req, res) => {
       res.status(404).json({ message: 'Маршрут API не знайдено.' });
+    });
+  }
+
+  // У продакшні (наприклад, на Render) той самий сервер віддає і зібраний React-застосунок,
+  // тому весь сайт працює за одним посиланням. Локально під час розробки цієї папки немає,
+  // і фронтенд, як і раніше, запускається окремо через Vite.
+  if (fs.existsSync(CLIENT_DIST)) {
+    app.use(express.static(CLIENT_DIST));
+    // Усі інші адреси (/tasks, /calendar тощо) віддають index.html — далі маршрутизацію виконує React Router
+    app.get(/^(?!\/api).*/, (_req, res) => {
+      res.sendFile(path.join(CLIENT_DIST, 'index.html'));
     });
   }
 
